@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { Github } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -46,7 +47,15 @@ export function Footer() {
             Disclaimer: HiAnime does not store any files on its server. All contents are provided by non-affiliated third parties.
           </p>
           <div className="flex gap-4">
-             {/* Social placeholders if needed */}
+             <a 
+               href="https://github.com/beyondbday69/Hianime.git" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="text-white/20 hover:text-white transition-colors"
+               title="View Source on GitHub"
+             >
+               <Github size={20} />
+             </a>
           </div>
         </div>
       </div>

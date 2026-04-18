@@ -1,7 +1,7 @@
 import { PageTransition } from "@/src/components/layout/PageTransition";
 import { Header } from "@/src/components/layout/Header";
 import { Footer } from "@/src/components/layout/Footer";
-import { ChevronRight, Code2, Globe, Cpu, ShieldCheck } from "lucide-react";
+import { ChevronRight, Code2, Globe, Cpu, ShieldCheck, Github } from "lucide-react";
 
 export function ApiInfo() {
   return (
@@ -53,23 +53,33 @@ export function ApiInfo() {
                 <h2 className="text-headline-l text-white mb-8 flex items-center gap-3">
                   <Code2 className="text-[var(--color-primary)]" /> Open Source Philosophy
                 </h2>
-                <p className="text-white/50 leading-relaxed italic mb-4">
+                <p className="text-white/50 leading-relaxed italic mb-8">
                   "This project was created strictly for educational purposes to explore 
                   Material Design 3 (Material You) and Apple macOS/iOS Human Interface Guidelines 
                   in a single-page application context."
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">React 18</div>
-                  <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">TypeScript</div>
-                  <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">Framer Motion</div>
-                  <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">Tailwind CSS</div>
+                <div className="flex flex-col gap-6">
+                  <a 
+                    href="https://github.com/beyondbday69/Hianime.git" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-full border border-white/10 transition-all w-fit group"
+                  >
+                    <Github className="group-hover:text-[var(--color-primary)] transition-colors" size={20} />
+                    <span className="font-bold text-[14px]">Explore Source on GitHub</span>
+                  </a>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">React 18</div>
+                    <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">TypeScript</div>
+                    <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">Framer Motion</div>
+                    <div className="px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold uppercase tracking-wider text-white/40">Tailwind CSS</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Compliance & Copyright */}
             <div className="space-y-12">
-              <div className="layer-3 p-8 rounded-[28px] border border-[var(--color-primary)]/20 shadow-2xl relative overflow-hidden">
+                <div className="layer-3 p-8 rounded-[28px] border border-[var(--color-primary)]/20 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <ShieldCheck size={120} />
                 </div>

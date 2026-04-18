@@ -11,7 +11,14 @@ import { cn } from "@/src/lib/utils";
 import { Play, Plus, Check, Star, Calendar, Clock, Heart, ChevronDown, Search } from "lucide-react";
 import { fetchAnimeDetails, fetchAnimeEpisodes, AnimeDetailProps, AnimeEpisode } from "@/src/services/api";
 import { auth, db, loginWithGoogle } from "@/src/lib/firebase";
-import { collection, doc, onSnapshot, setDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, setDoc, deleteDoc, query, where } from "firebase/firestore";
+
+interface WatchHistory {
+  episodeId: string;
+  progressSeconds: number;
+  durationSeconds?: number;
+  lastWatchedAt: number;
+}
 
 export function AnimeDetails() {
   const [match, params] = useRoute("/anime/:id");
@@ -28,6 +35,9 @@ export function AnimeDetails() {
   const [user, setUser] = useState(auth.currentUser);
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
   const [selectedSeason, setSelectedSeason] = useState(0);
+  
+  // Progress/History state
+  const [watchHistory, setWatchHistory] = useState<Record<string, WatchHistory>>({});
 
   const currentSeason = anime?.seasons?.find(s => s.anime_id === id) || (anime?.seasons && anime.seasons[0]);
 
@@ -41,6 +51,33 @@ export function AnimeDetails() {
     const unsubAuth = auth.onAuthStateChanged((u) => setUser(u));
     return () => unsubAuth();
   }, []);
+
+  // Fetch Watch History
+  useEffect(() => {
+    if (!user || !id) {
+      setWatchHistory({});
+      return;
+    }
+
+    const historyRef = collection(db, "users", user.uid, "history");
+    const q = query(historyRef, where("animeId", "==", id));
+    
+    const unsub = onSnapshot(q, (snapshot) => {
+      const history: Record<string, WatchHistory> = {};
+      snapshot.docs.forEach(d => {
+        const data = d.data();
+        history[data.episodeId] = {
+          episodeId: data.episodeId,
+          progressSeconds: data.progressSeconds,
+          durationSeconds: data.durationSeconds,
+          lastWatchedAt: data.lastWatchedAt
+        };
+      });
+      setWatchHistory(history);
+    });
+
+    return () => unsub();
+  }, [user, id]);
 
   useEffect(() => {
     if (!user || !id) {
@@ -295,24 +332,59 @@ export function AnimeDetails() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
-                    {filteredEpisodes.map((ep, idx) => (
-                      <motion.div
-                        onClick={() => setLocation(`/watch/${anime.anime_id}/${ep.ep_id}`)}
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-50px" }}
-                        transition={{ delay: (idx % 15) * 0.03 }}
-                        key={ep.ep_id}
-                        className="group flex gap-3 items-center bg-[#1A1A1A] border border-[#333333] rounded-[12px] p-2 hover:bg-[#222222] cursor-pointer transition-colors"
-                      >
-                        <div className="w-10 h-10 shrink-0 bg-black rounded-[8px] flex items-center justify-center font-bold text-[var(--color-primary)] opacity-80 group-hover:opacity-100 group-hover:bg-[var(--color-primary)] group-hover:text-black transition-colors">
-                          {ep.number}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-semibold text-white/80 truncate group-hover:text-white transition-colors">{ep.title}</p>
-                        </div>
-                      </motion.div>
-                    ))}
+                    {filteredEpisodes.map((ep, idx) => {
+                      const history = watchHistory[ep.ep_id];
+                      // If progressSeconds > 0, we can estimate progress if we had duration.
+                      // For now, if we don't have duration, we just show a "watching" or "completed" logic if it's very close.
+                      // But the requirement just says "visual indicator of progress".
+                      // We'll show a small bar if duration is available, or just a "Watched" tag.
+                      const progressPercent = (history && history.durationSeconds) 
+                        ? (history.progressSeconds / history.durationSeconds) * 100 
+                        : (history?.progressSeconds ? 50 : 0); // Fake 50% if just started but no duration
+
+                      return (
+                        <motion.div
+                          onClick={() => setLocation(`/watch/${anime.anime_id}/${ep.ep_id}`)}
+                          initial={{ opacity: 0, y: 10 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, margin: "-50px" }}
+                          transition={{ delay: (idx % 15) * 0.03 }}
+                          key={ep.ep_id}
+                          className={cn(
+                            "group relative flex flex-col bg-[#1A1A1A] border border-[#333333] rounded-[12px] p-3 hover:bg-[#222222] cursor-pointer transition-all overflow-hidden",
+                            history?.progressSeconds && "border-[var(--color-primary)]/30"
+                          )}
+                        >
+                          <div className="flex gap-3 items-center">
+                            <div className={cn(
+                              "w-10 h-10 shrink-0 bg-black rounded-[8px] flex items-center justify-center font-bold text-[var(--color-primary)] opacity-80 group-hover:opacity-100 transition-colors",
+                              history?.progressSeconds && "bg-[var(--color-primary)]/10"
+                            )}>
+                              {ep.number}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-white/80 truncate group-hover:text-white transition-colors">{ep.title}</p>
+                              {history?.progressSeconds ? (
+                                <span className="text-[10px] uppercase font-bold text-[var(--color-primary)]/70">
+                                  {progressPercent >= 95 ? "Completed" : "In Progress"}
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                          
+                          {/* Progress Bar */}
+                          {history?.progressSeconds ? (
+                            <div className="absolute bottom-0 left-0 w-full h-[3px] bg-black/50">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(progressPercent, 100)}%` }}
+                                className="h-full bg-[var(--color-primary)]"
+                              />
+                            </div>
+                          ) : null}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 )}
               </motion.div>

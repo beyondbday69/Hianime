@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Header } from "@/src/components/layout/Header";
+import { Footer } from "@/src/components/layout/Footer";
 import { PageTransition } from "@/src/components/layout/PageTransition";
 import { fetchMegaplay, fetchAnimeDetails, fetchAnimeEpisodes, AnimeDetailProps, AnimeEpisode, MegaplayResponse } from "@/src/services/api";
 import { auth, db } from "@/src/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import { Play } from "lucide-react";
+import { Play, SkipForward, SkipBack, Settings } from "lucide-react";
+
+// In-memory cache to persist data across component remounts for the same anime
+const animeDataCache: Record<string, { anime: AnimeDetailProps; episodes: AnimeEpisode[]; timestamp: number }> = {};
 
 export function Watch() {
   const [match, params] = useRoute("/watch/:animeId/:epId");
@@ -17,10 +21,69 @@ export function Watch() {
   const [episodes, setEpisodes] = useState<AnimeEpisode[]>([]);
   const [megaplay, setMegaplay] = useState<MegaplayResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [playerLoading, setPlayerLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [mode, setMode] = useState<'sub' | 'dub' | 'raw'>('sub');
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
+  const [autoNext, setAutoNext] = useState(true);
+
+  // Initialize from cache if available
+  useEffect(() => {
+    if (animeId && animeDataCache[animeId]) {
+      setAnime(animeDataCache[animeId].anime);
+      setEpisodes(animeDataCache[animeId].episodes);
+      setIsLoading(false);
+    }
+  }, [animeId]);
+
+  // Player Event Listeners
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      let data = event.data;
+
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch (e) {
+          return;
+        }
+      }
+
+      // Handle events
+      if (data.event === "complete" || data.type === "complete") {
+        if (autoNext) {
+          const nextIndex = episodes.findIndex(e => e.ep_id === epId) + 1;
+          if (nextIndex < episodes.length) {
+            setLocation(`/watch/${animeId}/${episodes[nextIndex].ep_id}`);
+          }
+        }
+      }
+
+      if (data.type === "watching-log" || data.event === "time") {
+        const currentTime = data.currentTime || data.time;
+        const duration = data.duration;
+        
+        if (auth.currentUser && currentTime && epId && animeId) {
+          try {
+            await setDoc(doc(db, "users", auth.currentUser.uid, "history", epId), {
+              userId: auth.currentUser.uid,
+              animeId: animeId,
+              episodeId: epId,
+              progressSeconds: Math.floor(currentTime),
+              ...(duration && { durationSeconds: Math.floor(duration) }),
+              lastWatchedAt: Date.now()
+            }, { merge: true });
+          } catch (e) {
+            // Silently fail history updates
+          }
+        }
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [episodes, epId, animeId, autoNext]);
 
   const filteredEpisodes = episodes.filter(
     (ep) =>
@@ -32,33 +95,61 @@ export function Watch() {
     if (!animeId || !epId) return;
 
     async function loadWatchData() {
-      setIsLoading(true);
+      // Only set main loading if we don't have cached data
+      if (!animeDataCache[animeId]) {
+        setIsLoading(true);
+      }
+      setPlayerLoading(true);
       setError(null);
+      setMegaplay(null); // Clear previous player source
+      
       try {
-        const [details, eps, mp] = await Promise.all([
-          fetchAnimeDetails(animeId!),
-          fetchAnimeEpisodes(animeId!),
-          fetchMegaplay(epId!)
-        ]);
-        setAnime(details);
-        setEpisodes(eps.episodes);
-        setMegaplay(mp);
+        // Fetch Megaplay ALWAYS for the specific episode
+        const mpPromise = fetchMegaplay(epId!);
         
-        if (!mp.sub && mp.dub) setMode('dub');
-        else if (!mp.sub && !mp.dub && mp.raw) setMode('raw');
+        // Only fetch details if needed
+        let detailsPromise = Promise.resolve(animeDataCache[animeId]?.anime || null);
+        let episodesPromise = Promise.resolve(animeDataCache[animeId]?.episodes ? { episodes: animeDataCache[animeId].episodes } : null);
+
+        if (!animeDataCache[animeId]) {
+          detailsPromise = fetchAnimeDetails(animeId!);
+          episodesPromise = fetchAnimeEpisodes(animeId!);
+        }
+
+        const [details, eps, mp] = await Promise.all([
+          detailsPromise,
+          episodesPromise as Promise<{ episodes: AnimeEpisode[] }>,
+          mpPromise
+        ]);
+
+        if (details && eps) {
+          setAnime(details);
+          setEpisodes(eps.episodes);
+          animeDataCache[animeId] = { anime: details, episodes: eps.episodes, timestamp: Date.now() };
+        }
+        
+        setMegaplay(mp);
+        setIsLoading(false); // Ensure main loading is false after we have initial data
+        
+        // Auto-select mode
+        if (mp) {
+           if (!mp[mode] && mp.sub) setMode('sub');
+           else if (!mp[mode] && mp.dub) setMode('dub');
+           else if (!mp[mode] && mp.raw) setMode('raw');
+        }
         
         // Track History if user logged in
-        if (auth.currentUser) {
+        if (auth.currentUser && epId && animeId) {
           try {
-            await setDoc(doc(db, "users", auth.currentUser.uid, "history", epId!), {
+            await setDoc(doc(db, "users", auth.currentUser.uid, "history", epId), {
               userId: auth.currentUser.uid,
-              animeId: animeId!,
-              episodeId: epId!,
+              animeId: animeId,
+              episodeId: epId,
               progressSeconds: 0,
               lastWatchedAt: Date.now()
-            });
+            }, { merge: true });
           } catch (e) {
-            console.error("History write failed", e);
+            console.error("Initial history write failed", e);
           }
         }
       } catch (err) {
@@ -66,6 +157,7 @@ export function Watch() {
         setError("Failed to load video player.");
       } finally {
         setIsLoading(false);
+        setPlayerLoading(false);
       }
     }
     loadWatchData();
@@ -85,7 +177,7 @@ export function Watch() {
              <div className="w-full h-full shimmer" />
           </div>
         </div>
-      ) : error || !anime || !megaplay ? (
+      ) : error || !anime ? (
         <div className="w-full h-[85vh] min-h-[600px] flex items-center justify-center flex-col gap-4">
           <div className="w-16 h-16 rounded-full layer-2 flex items-center justify-center text-3xl text-[#ff3333] mb-2 border border-white/10">
             !
@@ -99,7 +191,9 @@ export function Watch() {
           {/* Main Player Area */}
           <div className="flex-1 w-full flex flex-col gap-6">
             <div className="w-full aspect-video bg-black rounded-[16px] shadow-2xl relative overflow-hidden chrome-border">
-               {megaplay[mode] ? (
+               {playerLoading ? (
+                 <div className="w-full h-full shimmer" />
+               ) : megaplay?.[mode] ? (
                  <iframe 
                    src={megaplay[mode]!} 
                    allowFullScreen 
@@ -122,8 +216,19 @@ export function Watch() {
                 </h2>
               </div>
               
-              <div className="flex items-center gap-2 layer-2 p-1.5 rounded-[12px] border border-[#333333]">
-                {megaplay.sub && (
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-3 layer-2 px-4 py-2 rounded-[12px] border border-[#333333]">
+                   <span className="text-[12px] font-bold text-white/40 uppercase tracking-widest">Auto Next</span>
+                   <button 
+                    onClick={() => setAutoNext(!autoNext)}
+                    className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${autoNext ? 'bg-[var(--color-primary)]' : 'bg-white/10'}`}
+                   >
+                     <div className={`absolute top-1 w-3 h-3 rounded-full bg-black transition-all duration-300 ${autoNext ? 'left-6' : 'left-1'}`} />
+                   </button>
+                </div>
+
+                <div className="flex items-center gap-2 layer-2 p-1.5 rounded-[12px] border border-[#333333]">
+                {megaplay?.sub && (
                   <button 
                     onClick={() => setMode('sub')}
                     className={`px-4 py-2 font-bold rounded-[8px] text-[12px] transition-all ${mode === 'sub' ? 'bg-[#b0e3af] text-black shadow-sm' : 'text-white/60 hover:text-white hover:bg-[#222222]'}`}
@@ -131,7 +236,7 @@ export function Watch() {
                     SUB
                   </button>
                 )}
-                {megaplay.dub && (
+                {megaplay?.dub && (
                   <button 
                     onClick={() => setMode('dub')}
                     className={`px-4 py-2 font-bold rounded-[8px] text-[12px] transition-all ${mode === 'dub' ? 'bg-[#e3b5af] text-black shadow-sm' : 'text-white/60 hover:text-white hover:bg-[#222222]'}`}
@@ -139,7 +244,7 @@ export function Watch() {
                     DUB
                   </button>
                 )}
-                 {megaplay.raw && (
+                 {megaplay?.raw && (
                   <button 
                     onClick={() => setMode('raw')}
                     className={`px-4 py-2 font-bold rounded-[8px] text-[12px] transition-all ${mode === 'raw' ? 'bg-white text-black shadow-sm' : 'text-white/60 hover:text-white hover:bg-[#222222]'}`}
@@ -150,6 +255,7 @@ export function Watch() {
               </div>
             </div>
           </div>
+        </div>
 
           {/* Sidebar / Episodes */}
           <div className="w-full lg:w-[400px] shrink-0 layer-2 rounded-[16px] h-[600px] flex flex-col shadow-xl overflow-hidden chrome-border">
@@ -189,6 +295,7 @@ export function Watch() {
 
         </div>
       )}
+      <Footer />
     </main>
   </PageTransition>
 );

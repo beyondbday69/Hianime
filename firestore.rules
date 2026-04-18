@@ -11,36 +11,36 @@ service cloud.firestore {
     function isAdmin() { return false; } // No admin concepts required yet
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isValidId(id) { return id is string && id.size() <= 512 && id.matches('^[a-zA-Z0-9_\\-\\.]+$'); }
 
     // --- VALIDATION BLUEPRINTS ---
     // User validation
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'email', 'createdAt', 'updatedAt']) &&
              data.uid == request.auth.uid &&
-             data.email is string && data.email.size() <= 256 &&
+             data.email is string && data.email.size() <= 512 &&
              data.createdAt is number &&
              data.updatedAt is number &&
-             (data.keys().hasAll(['displayName']) ? (data.displayName is string && data.displayName.size() <= 100) : true) &&
-             (data.keys().hasAll(['avatarUrl']) ? (data.avatarUrl is string && data.avatarUrl.size() <= 1024) : true);
+             (data.keys().hasAll(['displayName']) ? (data.displayName is string && data.displayName.size() <= 256) : true) &&
+             (data.keys().hasAll(['avatarUrl']) ? (data.avatarUrl is string && data.avatarUrl.size() <= 2048) : true);
     }
     
     // Favorite validation
     function isValidFavorite(data) {
       return data.keys().hasAll(['userId', 'animeId', 'title', 'addedAt']) &&
              data.userId == request.auth.uid &&
-             data.animeId is string && data.animeId.size() <= 128 &&
-             data.title is string && data.title.size() <= 256 &&
+             data.animeId is string && data.animeId.size() <= 512 &&
+             data.title is string && data.title.size() <= 512 &&
              data.addedAt is number &&
-             (data.keys().hasAll(['posterUrl']) ? (data.posterUrl is string && data.posterUrl.size() <= 1024) : true);
+             (data.keys().hasAll(['posterUrl']) ? (data.posterUrl is string && data.posterUrl.size() <= 2048) : true);
     }
 
     // WatchHistory validation
     function isValidHistory(data) {
       return data.keys().hasAll(['userId', 'animeId', 'episodeId', 'progressSeconds', 'lastWatchedAt']) &&
              data.userId == request.auth.uid &&
-             data.animeId is string && data.animeId.size() <= 128 &&
-             data.episodeId is string && data.episodeId.size() <= 128 &&
+             data.animeId is string && data.animeId.size() <= 512 &&
+             data.episodeId is string && data.episodeId.size() <= 512 &&
              data.progressSeconds is number &&
              data.lastWatchedAt is number &&
              (data.keys().hasAll(['durationSeconds']) ? (data.durationSeconds is number) : true);
@@ -93,8 +93,7 @@ service cloud.firestore {
         
         allow create: if isSignedIn() && isValidId(userId) && isValidId(historyId) && 
                       userId == request.auth.uid && 
-                      isValidHistory(incoming()) &&
-                      exists(/databases/$(database)/documents/users/$(userId));
+                      isValidHistory(incoming());
                       
         allow update: if isSignedIn() && isValidId(userId) && isValidId(historyId) &&
                       userId == request.auth.uid && 
