@@ -87,12 +87,10 @@ export function Search() {
       <main className="min-h-screen pb-20 pt-0 overflow-x-hidden">
         <Header />
         
-        <div className="max-w-[1600px] mx-auto px-6 lg:px-10">
-          <div className="mb-10 p-8 layer-2 border border-white/10 rounded-[20px] shadow-2xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/10 to-transparent pointer-events-none" />
-            <h1 className="text-display text-white mb-2 relative z-10">Search Results</h1>
-            <p className="text-xl font-medium text-white/60 relative z-10">
-              For: <span className="text-[var(--color-primary)]">"{query}"</span>
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-10 pt-[120px]">
+          <div className="mb-10">
+            <p className="text-2xl font-medium text-white/40">
+              For: <span className="text-[var(--color-primary)] font-semibold">"{query}"</span>
             </p>
           </div>
 

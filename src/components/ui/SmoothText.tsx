@@ -8,10 +8,10 @@ interface SmoothTextProps extends HTMLMotionProps<"div"> {
 }
 
 export function SmoothText({ text, delay = 0, className = "", as = "div", ...props }: SmoothTextProps) {
-  const Component = motion.create(as as any);
+  const Component = as as any;
   
   return (
-    <Component 
+    <motion.div 
       className={`overflow-hidden inline-block ${className}`}
       {...(props as any)}
     >
@@ -27,6 +27,6 @@ export function SmoothText({ text, delay = 0, className = "", as = "div", ...pro
       >
         {text}
       </motion.div>
-    </Component>
+    </motion.div>
   );
 }

@@ -15,7 +15,7 @@ export function PageTransition({ children }: PageTransitionProps) {
         duration: 0.5,
         ease: [0.4, 0, 0.2, 1] // ease-smooth
       }}
-      className="w-full h-full"
+      className="w-full"
     >
       {children}
     </motion.div>

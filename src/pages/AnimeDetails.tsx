@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRoute, useLocation } from "wouter";
 import { motion, AnimatePresence } from "motion/react";
 import { Header } from "@/src/components/layout/Header";
@@ -32,6 +32,9 @@ export function AnimeDetails() {
 
   // Favorites state
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isSeasonOpen, setIsSeasonOpen] = useState(false);
+  const [showSeasonScrollHint, setShowSeasonScrollHint] = useState(true);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState(auth.currentUser);
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
   const [selectedSeason, setSelectedSeason] = useState(0);
@@ -266,12 +269,96 @@ export function AnimeDetails() {
                   {anime.seasons && anime.seasons.length > 0 && (
                      <div className="flex flex-col gap-3 mt-8 pt-6 border-t border-[#333333]">
                        <span className="text-sm font-semibold text-white/40">Seasons & Parts</span>
-                       <div className="flex flex-wrap gap-2">
+                       
+                       {/* Mobile Custom Dropdown */}
+                       <div className="relative md:hidden">
+                         <button 
+                           onClick={() => setIsSeasonOpen(!isSeasonOpen)}
+                           className="w-full flex items-center justify-between bg-[#1A1A1A] border border-[#333333] px-4 py-3 rounded-[12px] text-sm font-medium text-white/90 hover:border-[var(--color-primary)]/50 transition-all active:scale-[0.98]"
+                         >
+                           <span className="truncate pr-4">{anime.title}</span>
+                           <ChevronDown 
+                             size={18} 
+                             className={cn("text-[var(--color-primary)] transition-transform duration-300", isSeasonOpen && "rotate-180")} 
+                           />
+                         </button>
+
+                         <AnimatePresence>
+                           {isSeasonOpen && (
+                             <>
+                               <motion.div 
+                                 initial={{ opacity: 0 }}
+                                 animate={{ opacity: 1 }}
+                                 exit={{ opacity: 0 }}
+                                 onClick={() => setIsSeasonOpen(false)}
+                                 className="fixed inset-0 z-[100]"
+                               />
+                               <motion.div 
+                                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                 animate={{ opacity: 1, scale: 1, y: 0 }}
+                                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                 className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1A] border border-[#333333] rounded-[16px] shadow-2xl z-[101] overflow-hidden"
+                               >
+                                   <div 
+                                   ref={dropdownRef}
+                                   onScroll={() => {
+                                     if (dropdownRef.current) {
+                                       const { scrollTop, scrollHeight, clientHeight } = dropdownRef.current;
+                                       // Only show hint if we aren't near the bottom (within 5px)
+                                       setShowSeasonScrollHint(scrollTop + clientHeight < scrollHeight - 5);
+                                     }
+                                   }}
+                                   className="p-2 flex flex-col gap-1 max-h-[300px] overflow-y-auto scrollbar-none"
+                                 >
+                                   {anime.seasons.map((s: any) => (
+                                     <button
+                                       key={s.anime_id}
+                                       className={cn(
+                                         "flex items-center justify-between text-left px-4 py-3 rounded-[10px] text-[13px] font-medium transition-all",
+                                         id === s.anime_id 
+                                           ? "bg-[var(--color-primary)] text-black" 
+                                           : "text-white/70 hover:bg-white/5 hover:text-white"
+                                       )}
+                                       onClick={() => {
+                                         setLocation(`/anime/${s.anime_id}`);
+                                         setIsSeasonOpen(false);
+                                       }}
+                                     >
+                                       <span className="truncate pr-4">{s.title}</span>
+                                       {id === s.anime_id && <Check size={16} />}
+                                     </button>
+                                   ))}
+                                 </div>
+                                 
+                                 {/* Scroll Indicator Hint */}
+                                 <AnimatePresence>
+                                   {showSeasonScrollHint && anime.seasons.length > 5 && (
+                                     <motion.div 
+                                       initial={{ opacity: 0, y: 10 }}
+                                       animate={{ opacity: 1, y: 0 }}
+                                       exit={{ opacity: 0, y: 10 }}
+                                       className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/95 to-transparent pointer-events-none flex items-end justify-center pb-3 z-[110]"
+                                     >
+                                       <div className="flex flex-col items-center gap-1">
+                                         <span className="text-[11px] text-[var(--color-primary)] font-bold uppercase tracking-[0.15em] drop-shadow-md">More Seasons</span>
+                                         <ChevronDown size={14} className="text-[var(--color-primary)] animate-bounce" />
+                                       </div>
+                                     </motion.div>
+                                   )}
+                                 </AnimatePresence>
+                               </motion.div>
+                             </>
+                           )}
+                         </AnimatePresence>
+                       </div>
+
+                       {/* Desktop Flex Wrap */}
+                       <div className="hidden md:flex md:flex-wrap gap-2">
                          {anime.seasons.map((s: any) => (
                            <button
                              key={s.anime_id}
                              className={cn(
-                               "text-[13px] font-medium border px-3 py-1.5 rounded-[8px] transition-colors",
+                               "text-[13px] font-medium border px-3 py-1.5 rounded-[8px] transition-colors md:shrink md:w-auto text-center truncate md:min-w-0 md:max-w-none",
                                id === s.anime_id 
                                  ? "text-black bg-[var(--color-primary)] border-[var(--color-primary)]" 
                                  : "text-white/80 border-[#333333] bg-[#1A1A1A] hover:bg-[#222222]"
@@ -310,17 +397,17 @@ export function AnimeDetails() {
                 viewport={{ once: true }}
                 className="mt-16 border-t border-[#333333] pt-10"
               >
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                   <h2 className="text-headline-l text-white">Episodes <span className="text-white/40 text-[18px]">({filteredEpisodes.length})</span></h2>
-                  <div className="flex items-center gap-3">
-                        <div className="relative flex items-center">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="relative flex items-center w-full sm:w-[300px]">
                           <Search size={18} className="absolute left-3 text-white/50" />
                           <input 
                            type="text" 
                            placeholder="Search episodes..." 
                            value={episodeSearchQuery}
                            onChange={(e) => setEpisodeSearchQuery(e.target.value)}
-                           className="bg-[#1A1A1A] border border-[#333333] rounded-[8px] pl-10 pr-3 py-1.5 text-[13px] text-white outline-none focus:border-[var(--color-primary)] transition-colors w-full"
+                           className="bg-[#1A1A1A] border border-[#333333] rounded-[8px] pl-10 pr-3 py-2 text-[13px] text-white outline-none focus:border-[var(--color-primary)] transition-colors w-full"
                           />
                         </div>
                   </div>
