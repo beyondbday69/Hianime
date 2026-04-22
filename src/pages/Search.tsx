@@ -88,12 +88,6 @@ export function Search() {
         <Header />
         
         <div className="max-w-[1600px] mx-auto px-6 lg:px-10 pt-[120px]">
-          <div className="mb-10">
-            <p className="text-2xl font-medium text-white/40">
-              For: <span className="text-[var(--color-primary)] font-semibold">"{query}"</span>
-            </p>
-          </div>
-
           {isLoading ? (
             <div className="w-full h-[40vh]" />
           ) : error ? (
@@ -105,7 +99,7 @@ export function Search() {
             </div>
           ) : results.length === 0 ? (
             <div className="w-full h-[40vh] flex items-center justify-center flex-col gap-4">
-               <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center flex-col text-4xl text-white/50 mb-4 rounded-full">
+               <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center flex-col text-4xl text-[var(--color-primary)] mb-4 rounded-full">
                  🔍
                </div>
               <h2 className="text-headline-l text-center text-white">No results found</h2>

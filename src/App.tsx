@@ -11,6 +11,10 @@ import { Search } from "@/src/pages/Search";
 import { Watch } from "@/src/pages/Watch";
 import { ApiInfo } from "@/src/pages/ApiInfo";
 import { SmoothScroll } from "@/src/components/layout/SmoothScroll";
+import { Dubbed } from "@/src/pages/Dubbed";
+import { DubbedSearch } from "@/src/pages/DubbedSearch";
+import { DubbedAnimeDetails } from "@/src/pages/DubbedAnimeDetails";
+import { DubbedWatch } from "@/src/pages/DubbedWatch";
 
 export default function App() {
   return (
@@ -23,6 +27,13 @@ export default function App() {
           <Route path="/watch/:animeId/:epId" component={Watch} />
           <Route path="/search/:query" component={Search} />
           <Route path="/api-info" component={ApiInfo} />
+          
+          {/* Dubbed Routes */}
+          <Route path="/dubbed" component={Dubbed} />
+          <Route path="/dubbed/search/:query" component={DubbedSearch} />
+          <Route path="/dubbed/anime/:slug" component={DubbedAnimeDetails} />
+          <Route path="/dubbed/watch/:slug/:id" component={DubbedWatch} />
+
           {/* Fallback route */}
           <Route>
             <div className="min-h-screen flex items-center justify-center">

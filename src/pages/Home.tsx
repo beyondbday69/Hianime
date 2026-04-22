@@ -9,6 +9,7 @@ import { auth, db, loginWithGoogle } from "@/src/lib/firebase";
 import { collection, doc, onSnapshot, setDoc, deleteDoc } from "firebase/firestore";
 import { fetchHomeData, HomeResponse } from "@/src/services/api";
 import { Skeleton } from "@/src/components/ui/Skeleton";
+import { Github } from "lucide-react";
 
 export function Home() {
   const [_, setLocation] = useLocation();
@@ -94,9 +95,9 @@ export function Home() {
         <Header />
         
         {isLoading ? (
-          <div className="w-full h-[85vh] min-h-[600px] bg-[#000000]" />
+          <div className="w-full h-[85vh] min-h-[600px] bg-[#201F31]" />
         ) : error ? (
-          <div className="w-full h-[85vh] min-h-[600px] flex items-center justify-center flex-col gap-4 bg-[#000000]">
+          <div className="w-full h-[85vh] min-h-[600px] flex items-center justify-center flex-col gap-4 bg-[#201F31]">
             <div className="w-20 h-20 rounded-full bg-[#1A1A1A] border border-[#333333] flex items-center justify-center text-5xl text-[#ff3333] mb-4">
               !
             </div>
@@ -176,6 +177,15 @@ export function Home() {
             ))}
           </div>
         </section>
+
+        {/* GitHub Link */}
+        <div className="flex justify-center py-8">
+          <a href="https://github.com/beyondbday69/Hianime" target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-dark-900 border border-dark-700 hover:border-zinc-600 rounded-sm transition-all group">
+              <Github className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">Hianime</span>
+          </a>
+        </div>
       </div>
       <Footer />
     </main>

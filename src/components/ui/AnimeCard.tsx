@@ -63,7 +63,7 @@ export function AnimeCard({
           decoding="async"
           referrerPolicy="no-referrer"
           className={cn(
-            "w-full h-full object-cover z-10 relative transition-transform duration-500",
+            "w-full h-full object-cover z-10 relative transition-all duration-500",
             isLoaded ? "opacity-100" : "opacity-0",
             "group-hover:scale-105"
           )}

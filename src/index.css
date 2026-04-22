@@ -21,8 +21,8 @@
   --shadow-4: 0 20px 40px rgba(0,0,0,0.6), 0 10px 10px rgba(0,0,0,0.5);
   --shadow-5: 0 32px 64px rgba(0,0,0,0.7);
   
-  /* Primary Brand (Aniwatch style orange/accent) */
-  --color-primary: #ffdd95;
+  /* Primary Brand (New Pink Accent) */
+  --color-primary: #FFBADE;
 }
 
 * {
@@ -30,9 +30,15 @@
   box-sizing: border-box;
 }
 
+html {
+  background-color: #201F31;
+  height: 100%;
+}
+
 body {
-  /* Layer 1 - AMOLED Background */
-  background-color: #000000;
+  /* Layer 1 - New Base Background */
+  background-color: #201F31;
+  min-height: 100%;
   color: #FFFFFF;
   -webkit-font-smoothing: antialiased;
   font-family: var(--font-sans);
@@ -42,7 +48,7 @@ body {
 /* Layer Utilities */
 @layer utilities {
   .layer-1 {
-    background-color: #000000;
+    background-color: #201F31;
   }
   .layer-2 {
     background-color: #111111;

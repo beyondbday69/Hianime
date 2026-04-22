@@ -145,7 +145,7 @@ export function AnimeDetails() {
         <Header />
         
         {isLoading ? (
-          <div className="w-full h-[85vh] min-h-[600px] bg-[#000000]" />
+          <div className="w-full h-[85vh] min-h-[600px] bg-[#201F31]" />
         ) : error || !anime ? (
           <div className="w-full h-[85vh] min-h-[600px] flex items-center justify-center flex-col gap-4 border-b-[3px] border-black bg-[#FFCC00]">
             <div className="w-20 h-20 bg-[#FF3366] brutal-border flex items-center justify-center text-5xl text-black font-black shadow-[6px_6px_0_0_#000] rotate-[-5deg] mb-4">
@@ -164,7 +164,7 @@ export function AnimeDetails() {
                 className="w-full h-full object-cover opacity-30 mix-blend-screen blur-[8px] scale-110 saturate-[1.2]" 
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#0A0A0A]/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#201F31] via-[#201F31]/80 to-transparent" />
             </div>
 
             {/* Content Area */}
@@ -182,7 +182,8 @@ export function AnimeDetails() {
                     <img 
                       src={anime.image} 
                       alt={anime.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-all duration-500 opacity-0 group-hover:scale-105"
+                      onLoad={(e) => e.currentTarget.classList.add('opacity-100')}
                       referrerPolicy="no-referrer"
                       style={{ viewTransitionName: `poster-${anime.anime_id}` }}
                     />

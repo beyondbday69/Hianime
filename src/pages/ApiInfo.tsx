@@ -6,12 +6,11 @@ import { ChevronRight, Code2, Globe, Cpu, ShieldCheck, Github } from "lucide-rea
 export function ApiInfo() {
   return (
     <PageTransition>
-      <main className="min-h-screen pt-[72px] pb-0 bg-black">
+      <main className="min-h-screen pt-[72px] pb-0 bg-[#201F31]">
         <Header />
         
         {/* Hero Section */}
         <section className="relative py-20 overflow-hidden border-b border-[#333333]">
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/5 via-transparent to-transparent" />
           <div className="max-w-[1600px] mx-auto px-6 lg:px-12 relative z-10">
             <h1 className="text-display tracking-tighter text-white mb-6">
               API & <span className="text-[var(--color-primary)]">Architecture</span>
@@ -117,6 +116,130 @@ export function ApiInfo() {
                      </li>
                    ))}
                  </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dedicated Full-Width AnimeSalt API Data Section */}
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-12 py-20 border-t border-[#333333]">
+          <h2 className="text-display text-[32px] md:text-[40px] text-white mb-6 flex items-center gap-4">
+            <Globe className="text-[var(--color-primary)]" size={40} /> AnimeSalt API Data
+          </h2>
+          <p className="text-xl text-white/50 max-w-2xl leading-relaxed mb-12">
+            API endpoints mapping, integration methodology, and data types corresponding to the AnimeSalt GraphQL / REST instances.
+            <br/><br/>
+            Base URL: <code className="text-[#FFBADE] bg-[#FFBADE]/10 px-3 py-1.5 rounded-lg text-sm font-bold ml-2">https://animesalt-api-lovat.vercel.app</code>
+          </p>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Endpoint 1 */}
+            <div className="layer-2 rounded-[24px] border border-white/5 overflow-hidden shadow-2xl">
+              <div className="bg-white/5 px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                <span className="font-mono text-[14px] font-bold text-white">GET /api/home</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-1 rounded">Discovery</span>
+              </div>
+              <div className="p-6 overflow-x-auto h-[350px] custom-scroller">
+                <pre className="text-white/70 font-mono text-[13px] leading-relaxed">
+{`{
+  "success": true,
+  "data": {
+    "fresh_drops": [
+      {
+        "title": "Frieren: Beyond Journey's End",
+        "url": "https://animesalt.ac/series/frieren-beyond-journeys-end/",
+        "slug": "frieren-beyond-journeys-end",
+        "image": "https://image.tmdb.org/t/p/w500/dqZENchTd7lp5zht7BdlqM7RBhD.jpg"
+      }
+    ],
+    // Categories
+    "on-air_series_view_more": [...],
+    "new_anime_arrivals_view_more": [...],
+    "just_in:_cartoon_series_view_more": [...],
+    "fresh_anime_films_view_more": [...],
+    "fresh_cartoon_films_view_more": [...]
+  }
+}`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Endpoint 2 */}
+            <div className="layer-2 rounded-[24px] border border-white/5 overflow-hidden shadow-2xl">
+              <div className="bg-white/5 px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                <span className="font-mono text-[14px] font-bold text-white">GET /api/search?q=naruto</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-green-400 bg-green-400/10 px-2 py-1 rounded">Search</span>
+              </div>
+              <div className="p-6 overflow-x-auto h-[350px] custom-scroller">
+                <pre className="text-white/70 font-mono text-[13px] leading-relaxed">
+{`{
+  "success": true,
+  "query": "naruto",
+  "results": [
+    {
+      "title": "Naruto",
+      "url": "https://animesalt.ac/series/naruto/",
+      "slug": "naruto",
+      "image": "https://image.tmdb.org/t/p/w500/xppeysfvDKVx775MFuH8Z9BlpMk.jpg"
+    }
+  ]
+}`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Endpoint 3 */}
+            <div className="layer-2 rounded-[24px] border border-white/5 overflow-hidden shadow-2xl">
+              <div className="bg-white/5 px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                <span className="font-mono text-[14px] font-bold text-white">GET /api/anime/:slug</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-blue-400 bg-blue-400/10 px-2 py-1 rounded">Details</span>
+              </div>
+              <div className="p-6 overflow-x-auto h-[350px] custom-scroller">
+                <pre className="text-white/70 font-mono text-[13px] leading-relaxed">
+{`{
+  "success": true,
+  "data": {
+    "title": "Naruto",
+    "description": "In another world, ninja are the ultimate power...",
+    "genres": ["Action", "Adventure", "Fantasy"],
+    "thumbnail": "https://image.tmdb.org/t/p/w342/xppeysfvDKVx775MFuH8Z9BlpMk.jpg",
+    "is_movie": false,
+    "episodes": [
+      {
+        "number": "1",
+        "title": "Enter: Naruto Uzumaki!",
+        "url": "https://animesalt.ac/episode/naruto-1x1/",
+        "id": "naruto-1x1",
+        "thumbnail": "...",
+        "season": "1"
+      }
+    ],
+    "movie_players": [] // For movies, contains streaming sources
+  }
+}`}
+                </pre>
+              </div>
+            </div>
+
+            {/* Endpoint 4 */}
+            <div className="layer-2 rounded-[24px] border border-white/5 overflow-hidden shadow-2xl">
+              <div className="bg-white/5 px-6 py-4 border-b border-white/5 flex items-center justify-between">
+                <span className="font-mono text-[14px] font-bold text-white">GET /api/episode/:id</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-purple-400 bg-purple-400/10 px-2 py-1 rounded">Playback</span>
+              </div>
+              <div className="p-6 overflow-x-auto h-[350px] custom-scroller">
+                <pre className="text-white/70 font-mono text-[13px] leading-relaxed">
+{`{
+  "success": true,
+  "data": {
+    "video_player": "https://as-cdn21.top/video/36660e59856...",
+    "m3u8_link": null,
+    "source": "https://animesalt.ac/episode/naruto-1x1/",
+    "next_episode_id": "naruto-1x2",
+    "prev_episode_id": null
+  }
+}`}
+                </pre>
               </div>
             </div>
           </div>

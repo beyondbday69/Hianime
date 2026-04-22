@@ -1,6 +1,23 @@
 // Constants for the Unofficial Aniwatch API
 export const API_BASE = "https://aniwatch-scraper-kappa.vercel.app";
 
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const apiCache: Record<string, { data: any; timestamp: number }> = {};
+
+async function fetchWithCache<T>(url: string): Promise<T> {
+  const now = Date.now();
+  if (apiCache[url] && now - apiCache[url].timestamp < CACHE_TTL) {
+    return apiCache[url].data;
+  }
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch from ${url}: ${response.statusText}`);
+  }
+  const data = await response.json();
+  apiCache[url] = { data, timestamp: now };
+  return data;
+}
+
 export interface AnimeOverview {
   anime_id: string;
   title: string;
@@ -27,14 +44,7 @@ export interface HomeResponse {
 }
 
 export async function fetchHomeData(): Promise<HomeResponse> {
-  const url = `${API_BASE}/home`;
-  const response = await fetch(url);
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch home data: ${response.statusText}`);
-  }
-  
-  return await response.json();
+  return fetchWithCache<HomeResponse>(`${API_BASE}/home`);
 }
 
 export interface AnimeDetailProps {
@@ -76,12 +86,7 @@ export interface MegaplayResponse {
 }
 
 export async function fetchMegaplay(epId: string): Promise<MegaplayResponse> {
-  const url = `${API_BASE}/megaplay/${epId}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch megaplay links: ${response.statusText}`);
-  }
-  return await response.json();
+  return fetchWithCache<MegaplayResponse>(`${API_BASE}/megaplay/${epId}`);
 }
 
 export interface SearchResponse {
@@ -89,28 +94,13 @@ export interface SearchResponse {
 }
 
 export async function fetchSearchData(query: string): Promise<SearchResponse> {
-  const url = `${API_BASE}/search?q=${encodeURIComponent(query)}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch search data: ${response.statusText}`);
-  }
-  return await response.json();
+  return fetchWithCache<SearchResponse>(`${API_BASE}/search?q=${encodeURIComponent(query.trim())}`);
 }
 
 export async function fetchAnimeDetails(id: string): Promise<AnimeDetailProps> {
-  const url = `${API_BASE}/anime/${id}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch anime details: ${response.statusText}`);
-  }
-  return await response.json();
+  return fetchWithCache<AnimeDetailProps>(`${API_BASE}/anime/${id}`);
 }
 
 export async function fetchAnimeEpisodes(id: string): Promise<EpisodesResponse> {
-  const url = `${API_BASE}/episodes/${id}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch anime episodes: ${response.statusText}`);
-  }
-  return await response.json();
+  return fetchWithCache<EpisodesResponse>(`${API_BASE}/episodes/${id}`);
 }

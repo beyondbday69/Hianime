@@ -44,11 +44,12 @@ export function HeroCarousel({ items }: HeroCarouselProps) {
           <img 
             src={items[currentIndex].bannerUrl} 
             alt={items[currentIndex].title}
-            className="w-full h-full object-cover opacity-60 mix-blend-screen saturate-[1.2]"
+            className="w-full h-full object-cover transition-all duration-1000 opacity-0 mix-blend-screen saturate-[1.2]"
+            onLoad={(e) => e.currentTarget.classList.replace('opacity-0', 'opacity-60')}
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#000000]/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#201F31] via-[#201F31]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#201F31]/80 via-transparent to-transparent" />
         </motion.div>
       </AnimatePresence>
 

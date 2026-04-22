@@ -24,7 +24,11 @@ export function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      setLocation(`/search/${encodeURIComponent(searchQuery.trim())}`);
+      if (location.includes('/dubbed')) {
+        setLocation(`/dubbed/search/${encodeURIComponent(searchQuery.trim())}`);
+      } else {
+        setLocation(`/search/${encodeURIComponent(searchQuery.trim())}`);
+      }
       setIsMenuOpen(false);
     }
   };
@@ -32,6 +36,7 @@ export function Header() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/tv", label: "TV Series" },
+    { href: "/dubbed", label: "Dubbed" },
   ];
 
   return (
@@ -42,7 +47,7 @@ export function Header() {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
           "fixed top-0 left-0 right-0 z-50 flex items-center transition-all duration-300 px-4 md:px-6 lg:px-10 h-[72px]",
-          isMenuOpen ? "bg-black border-b border-[#333333]" : "bg-transparent border-transparent"
+          isMenuOpen ? "bg-[#201F31] border-b border-[#333333]" : "bg-transparent border-transparent"
         )}
       >
         <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between">
@@ -50,7 +55,7 @@ export function Header() {
             <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
-            <Link href="/" className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsMenuOpen(false)}>
+            <Link href="/" className="flex items-center gap-2 group cursor-pointer flex-shrink-0" onClick={() => setIsMenuOpen(false)}>
               <div className="text-[20px] md:text-[24px] font-bold tracking-tighter text-white">
                 Hi<span className="text-[var(--color-primary)]">Anime</span>
               </div>
@@ -72,7 +77,7 @@ export function Header() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <form onSubmit={handleSearch} className="relative flex items-center group">
               <div className="absolute left-4 text-white/40 group-focus-within:text-[var(--color-primary)] transition-colors duration-300">
                 <Search size={18} strokeWidth={2.5} />
@@ -110,10 +115,11 @@ export function Header() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-[72px] left-0 right-0 z-40 bg-black border-b border-[#333333] p-6 md:hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-x-0 top-[72px] z-40 bg-[#201F31] border-b border-[#333333] p-6 md:hidden overflow-hidden"
           >
             <div className="flex flex-col gap-4 text-[16px] font-bold text-white/50">
               {/* Mobile Mobile Search - Duplicate for visibility */}

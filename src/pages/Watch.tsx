@@ -184,7 +184,7 @@ export function Watch() {
           </div>
         </div>
       ) : error || !anime ? (
-        <div className="w-full h-[85vh] min-h-[600px] flex items-center justify-center flex-col gap-4">
+        <div className="w-full h-[85vh] min-h-[600px] flex items-center justify-center flex-col gap-4 bg-[#201F31]">
           <div className="w-16 h-16 rounded-full layer-2 flex items-center justify-center text-3xl text-[#ff3333] mb-2 border border-white/10">
             !
           </div>
