@@ -8,11 +8,13 @@ import { AnimeCard } from "@/src/components/ui/AnimeCard";
 import { fetchSearchData } from "@/src/services/api";
 import { auth, db, loginWithGoogle } from "@/src/lib/firebase";
 import { doc, onSnapshot, setDoc, deleteDoc, collection } from "firebase/firestore";
+import { useProvider } from "@/src/contexts/ProviderContext";
 
 export function Search() {
   const [match, params] = useRoute("/search/:query");
-  const query = params && 'query' in params ? decodeURIComponent((params as any).query) : "";
+  const query = params && "query" in params ? decodeURIComponent((params as any).query) : "";
   const [_, setLocation] = useLocation();
+  const { provider } = useProvider();
 
   const [results, setResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +50,7 @@ export function Search() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchSearchData(query);
+        const data = await fetchSearchData(query, provider);
         setResults(data.results || []);
       } catch (err) {
         console.error(err);
@@ -58,9 +60,8 @@ export function Search() {
       }
     }
     loadData();
-  }, [query]);
+  }, [query, provider]);
 
-  // Handle fav tracking via polling or manual fetch in real app, here we just stub toggle
   const toggleFavorite = async (id: string, title: string, imageUrl: string) => {
     if (!user) {
       await loginWithGoogle();
@@ -86,30 +87,30 @@ export function Search() {
     <PageTransition>
       <main className="min-h-screen pb-20 pt-0 overflow-x-hidden">
         <Header />
-        
+
         <div className="max-w-[1600px] mx-auto px-6 lg:px-10 pt-[120px]">
           {isLoading ? (
             <div className="w-full h-[40vh]" />
           ) : error ? (
             <div className="w-full h-[40vh] flex items-center justify-center flex-col gap-4">
-                 <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center flex-col text-5xl text-[#ff3333] mb-4 rounded-full">
-                  !
-                </div>
+              <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center flex-col text-5xl text-[#ff3333] mb-4 rounded-full">
+                !
+              </div>
               <h2 className="text-headline-l text-center text-white">{error}</h2>
             </div>
           ) : results.length === 0 ? (
             <div className="w-full h-[40vh] flex items-center justify-center flex-col gap-4">
-               <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center flex-col text-4xl text-[var(--color-primary)] mb-4 rounded-full">
-                 🔍
-               </div>
+              <div className="w-20 h-20 bg-white/5 border border-white/10 flex items-center justify-center flex-col text-4xl text-[var(--color-primary)] mb-4 rounded-full">
+                ??
+              </div>
               <h2 className="text-headline-l text-center text-white">No results found</h2>
               <p className="text-body-m font-medium text-white/50">Try searching for something else</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8">
               {results.map((anime, i) => (
-                <AnimeCard 
-                  key={anime.anime_id} 
+                <AnimeCard
+                  key={anime.anime_id}
                   id={anime.anime_id}
                   title={anime.title}
                   imageUrl={anime.image}

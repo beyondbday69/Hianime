@@ -10,12 +10,14 @@ import { collection, doc, onSnapshot, setDoc, deleteDoc } from "firebase/firesto
 import { fetchHomeData, HomeResponse } from "@/src/services/api";
 import { Skeleton } from "@/src/components/ui/Skeleton";
 import { Github } from "lucide-react";
+import { useProvider } from "@/src/contexts/ProviderContext";
 
 export function Home() {
   const [_, setLocation] = useLocation();
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [user, setUser] = useState(auth.currentUser);
-  
+  const { provider } = useProvider();
+
   const [homeData, setHomeData] = useState<HomeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,8 @@ export function Home() {
     async function loadData() {
       try {
         setIsLoading(true);
-        const data = await fetchHomeData();
+        setError(null);
+        const data = await fetchHomeData(provider);
         setHomeData(data);
       } catch (err) {
         setError("Failed to load anime content. Please try again.");
@@ -56,9 +59,8 @@ export function Home() {
         setIsLoading(false);
       }
     }
-    
     loadData();
-  }, []);
+  }, [provider]);
 
   const toggleFavorite = async (id: string, animeTitle: string, animePoster: string) => {
     if (!user) {
@@ -80,7 +82,6 @@ export function Home() {
     }
   };
 
-  // Maps API spotlight to HeroCarousel props
   const heroItems: HeroAnime[] = homeData?.spotlight.slice(0, 5).map(item => ({
     id: item.anime_id,
     title: item.title,
@@ -93,7 +94,7 @@ export function Home() {
     <PageTransition>
       <main className="min-h-screen pb-20 overflow-x-hidden pt-0">
         <Header />
-        
+
         {isLoading ? (
           <div className="w-full h-[85vh] min-h-[600px] bg-[#201F31]" />
         ) : error ? (
@@ -109,7 +110,7 @@ export function Home() {
         )}
 
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12 mt-20 space-y-20">
-        
+
         {/* Trending Section */}
         <section>
           <div className="flex items-center justify-between mb-6">
@@ -118,15 +119,15 @@ export function Home() {
               View All
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="aspect-[2/3] rounded-[12px] shimmer" />
               ))
             ) : homeData?.trending.slice(0, 12).map((anime, i) => (
-              <AnimeCard 
-                key={anime.anime_id} 
+              <AnimeCard
+                key={anime.anime_id}
                 id={anime.anime_id}
                 title={anime.title}
                 imageUrl={anime.image}
@@ -152,15 +153,15 @@ export function Home() {
               View All
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="aspect-[2/3] rounded-[12px] shimmer" />
               ))
             ) : homeData?.latest_episodes.slice(0, 12).map((anime, i) => (
-              <AnimeCard 
-                key={anime.anime_id} 
+              <AnimeCard
+                key={anime.anime_id}
                 id={anime.anime_id}
                 title={anime.title}
                 imageUrl={anime.image}
