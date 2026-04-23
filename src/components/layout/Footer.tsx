@@ -1,8 +1,17 @@
 import { Link } from "wouter";
 import { Github } from "lucide-react";
+import { useState } from "react";
+import { getProvider, setProvider } from "@/src/services/api";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const [providerState, setProviderState] = useState(getProvider());
+
+  const handleProviderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setProviderState(val);
+    setProvider(val);
+  };
   
   return (
     <footer className="w-full border-t border-[#333333] bg-[#201F31] py-12 mt-20">
@@ -39,6 +48,32 @@ export function Footer() {
               <li><span className="text-white/40 text-[14px] block">Copyright © {currentYear} HiAnime</span></li>
               <li><span className="text-white/40 text-[14px] block italic opacity-60">Reserved by HiAnime</span></li>
             </ul>
+
+            <h3 className="text-white font-bold mb-3 mt-6 uppercase text-[12px] tracking-widest">API Provider</h3>
+            <div className="flex items-center gap-4 text-white/80 text-[14px]">
+              <label className="flex items-center gap-2 cursor-pointer hover:text-[var(--color-primary)]">
+                <input 
+                  type="radio" 
+                  name="apiProvider" 
+                  value="tv" 
+                  checked={providerState === "tv"} 
+                  onChange={handleProviderChange}
+                  className="accent-[var(--color-primary)]"
+                />
+                aniwatchtv.to (tv)
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer hover:text-[var(--color-primary)]">
+                <input 
+                  type="radio" 
+                  name="apiProvider" 
+                  value="co" 
+                  checked={providerState === "co"} 
+                  onChange={handleProviderChange}
+                  className="accent-[var(--color-primary)]"
+                />
+                aniwatch.co.at (co)
+              </label>
+            </div>
           </div>
         </div>
         

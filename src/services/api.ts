@@ -4,17 +4,36 @@ export const API_BASE = "https://aniwatch-scraper-kappa.vercel.app";
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const apiCache: Record<string, { data: any; timestamp: number }> = {};
 
-async function fetchWithCache<T>(url: string): Promise<T> {
-  const now = Date.now();
-  if (apiCache[url] && now - apiCache[url].timestamp < CACHE_TTL) {
-    return apiCache[url].data;
+export function getProvider(): string {
+  return localStorage.getItem("api_provider") || "tv";
+}
+
+export function setProvider(provider: string) {
+  localStorage.setItem("api_provider", provider);
+  window.location.reload(); // Reload the page to fetch with new provider
+}
+
+function appendProvider(url: string): string {
+  const provider = getProvider();
+  if (url.includes("?")) {
+    return `${url}&provider=${provider}`;
   }
-  const response = await fetch(url);
+  return `${url}?provider=${provider}`;
+}
+
+async function fetchWithCache<T>(url: string, useProvider = true): Promise<T> {
+  const finalUrl = useProvider ? appendProvider(url) : url;
+  const cacheKey = finalUrl;
+  const now = Date.now();
+  if (apiCache[cacheKey] && now - apiCache[cacheKey].timestamp < CACHE_TTL) {
+    return apiCache[cacheKey].data;
+  }
+  const response = await fetch(finalUrl);
   if (!response.ok) {
-    throw new Error(`Failed to fetch from ${url}: ${response.statusText}`);
+    throw new Error(`Failed to fetch from ${finalUrl}: ${response.statusText}`);
   }
   const data = await response.json();
-  apiCache[url] = { data, timestamp: now };
+  apiCache[cacheKey] = { data, timestamp: now };
   return data;
 }
 
@@ -86,7 +105,7 @@ export interface MegaplayResponse {
 }
 
 export async function fetchMegaplay(epId: string): Promise<MegaplayResponse> {
-  return fetchWithCache<MegaplayResponse>(`${API_BASE}/megaplay/${epId}`);
+  return fetchWithCache<MegaplayResponse>(`${API_BASE}/megaplay/${epId}`, false);
 }
 
 export interface SearchResponse {
