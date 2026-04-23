@@ -105,9 +105,7 @@ export function ProviderSelectorFooter() {
           );
         })}
       </div>
-      <p className="text-white/20 text-[11px] mt-1 italic leading-relaxed">
-        Switch your streaming source anytime. Each provider offers different content and servers.
-      </p>
+
     </div>
   );
 }
