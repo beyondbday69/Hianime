@@ -6,6 +6,21 @@ export const API_BASE = "https://aniwatch-scraper-kappa.vercel.app";
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const apiCache: Record<string, { data: any; timestamp: number }> = {};
 
+function sanitizeData(data: any): any {
+  if (Array.isArray(data)) {
+    data.forEach(item => sanitizeData(item));
+  } else if (data !== null && typeof data === 'object') {
+    Object.keys(data).forEach(key => {
+      if ((key === 'anime_id' || key === 'id') && typeof data[key] === 'string' && data[key].startsWith('anime/')) {
+        data[key] = data[key].replace(/^anime\//, '');
+      } else {
+        sanitizeData(data[key]);
+      }
+    });
+  }
+  return data;
+}
+
 async function fetchWithCache<T>(url: string, timeoutMs: number = 30000): Promise<T> {
   const now = Date.now();
   if (apiCache[url] && now - apiCache[url].timestamp < CACHE_TTL) {
@@ -20,6 +35,7 @@ async function fetchWithCache<T>(url: string, timeoutMs: number = 30000): Promis
       throw new Error(`Failed to fetch from ${url}: ${response.statusText}`);
     }
     const data = await response.json();
+    sanitizeData(data);
     apiCache[url] = { data, timestamp: now };
     return data;
   } catch (err: any) {
