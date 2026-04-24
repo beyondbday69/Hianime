@@ -45,8 +45,13 @@ export default function App() {
           </Switch>
 
           {/* Global Warning Banner */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ff3333] text-white text-center py-2 px-4 text-sm font-medium shadow-[0_-4px_10px_rgba(0,0,0,0.3)]">
-            Please stay on the page. The video is taking a little time to load. We apologize for the inconvenience — video server maintenance is currently in progress.
+          <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ff3333] text-white text-center py-2 px-4 text-sm font-medium shadow-[0_-4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center gap-2">
+            <span>Please stay on the page. The video is taking a little time to load. We apologize for the inconvenience — video server maintenance is currently in progress.</span>
+            <span className="inline-flex gap-1 items-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: "0ms" }}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: "150ms" }}></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-bounce" style={{ animationDelay: "300ms" }}></span>
+            </span>
           </div>
         </div>
       </SmoothScroll>
