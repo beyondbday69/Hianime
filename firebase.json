@@ -8,10 +8,17 @@
     ],
     "rewrites": [
       {
+        "source": "/api/animesalt/**",
+        "function": "apiProxy"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ]
+  },
+  "functions": {
+    "source": "functions"
   },
   "firestore": {
     "rules": "firestore.rules"

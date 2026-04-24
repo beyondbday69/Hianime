@@ -14,7 +14,7 @@ async function startServer() {
       target: "https://animesalt-api-lovat.vercel.app",
       changeOrigin: true,
       pathRewrite: {
-        "^/api/animesalt": "/api",
+        "^/api/animesalt": "",
       },
     })
   );
