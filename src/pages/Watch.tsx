@@ -105,10 +105,13 @@ export function Watch() {
         let episodesData = cacheKey ? (animeDataCache[cacheKey]?.episodes ? { episodes: animeDataCache[cacheKey].episodes } : null) : null;
 
         if (!cacheKey || !animeDataCache[cacheKey]) {
-          const [det, eps] = await Promise.all([
-            fetchAnimeDetails(animeId!, provider),
-            fetchAnimeEpisodes(animeId!, provider)
-          ]);
+          const det = await fetchAnimeDetails(animeId!, provider);
+          let eps: { episodes: AnimeEpisode[] } = { episodes: [] };
+          try {
+            eps = await fetchAnimeEpisodes(animeId!, provider);
+          } catch (epErr) {
+            console.warn("Failed to fetch episodes, continuing with empty list:", epErr);
+          }
           detailsData = det;
           episodesData = eps;
           if (cacheKey) {
@@ -128,7 +131,7 @@ export function Watch() {
           const epNumber = currentEpObj?.number || epId;
           mp = await fetchStreamingSources(epId!, provider, animeId!, epNumber);
         } else {
-          // tv uses megaplay, co uses servers?sources — both handled inside fetchStreamingSources
+          // tv uses megaplay, co uses servers?sources ï¿½ both handled inside fetchStreamingSources
           mp = await fetchStreamingSources(epId!, provider);
         }
 

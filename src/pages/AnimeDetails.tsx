@@ -9,7 +9,7 @@ import { Button } from "@/src/components/ui/Button";
 import { SmoothText } from "@/src/components/ui/SmoothText";
 import { cn } from "@/src/lib/utils";
 import { Play, Plus, Check, Star, Calendar, Clock, Heart, ChevronDown, Search } from "lucide-react";
-import { fetchAnimeDetails, fetchAnimeEpisodes, AnimeDetailProps, AnimeEpisode } from "@/src/services/api";
+import { fetchAnimeDetails, fetchAnimeEpisodes, AnimeDetailProps, AnimeEpisode, EpisodesResponse } from "@/src/services/api";
 import { auth, db, loginWithGoogle } from "@/src/lib/firebase";
 import { collection, doc, onSnapshot, setDoc, deleteDoc, query, where } from "firebase/firestore";
 import { useProvider } from "@/src/contexts/ProviderContext";
@@ -96,10 +96,14 @@ export function AnimeDetails() {
       setIsLoading(true);
       setError(null);
       try {
-        const [detailsData, episodesData] = await Promise.all([
-          fetchAnimeDetails(id!, provider),
-          fetchAnimeEpisodes(id!, provider)
-        ]);
+        const detailsData = await fetchAnimeDetails(id!, provider);
+        let episodesData: EpisodesResponse = { episodes: [] };
+        try {
+          episodesData = await fetchAnimeEpisodes(id!, provider);
+        } catch (epErr) {
+          console.warn("Failed to fetch episodes, continuing with empty list:", epErr);
+        }
+        
         setAnime(detailsData);
         setEpisodes(episodesData.episodes || []);
       } catch (err) {
