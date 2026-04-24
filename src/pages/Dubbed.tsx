@@ -18,8 +18,8 @@ export function Dubbed() {
       try {
         const result = await fetchAnimeSaltHome();
         setData(result);
-      } catch (err) {
-        setError("Failed to load Dubbed Anime & Cartoons.");
+      } catch (err: any) {
+        setError("Failed to load: " + (err.message || "Unknown error"));
       } finally {
         setIsLoading(false);
       }

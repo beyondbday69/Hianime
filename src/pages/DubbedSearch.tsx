@@ -22,9 +22,9 @@ export function DubbedSearch() {
       try {
         const res = await fetchAnimeSaltSearch(query);
         setResults(res.results || []);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Search failed:", err);
-        setError("Failed to fetch search results.");
+        setError("Search failed: " + (err.message || "Unknown error"));
       } finally {
         setIsLoading(false);
       }
