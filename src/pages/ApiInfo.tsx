@@ -129,7 +129,7 @@ export function ApiInfo() {
           <p className="text-xl text-white/50 max-w-2xl leading-relaxed mb-12">
             API endpoints mapping, integration methodology, and data types corresponding to the AnimeSalt GraphQL / REST instances.
             <br/><br/>
-            Base URL: <code className="text-[#FFBADE] bg-[#FFBADE]/10 px-3 py-1.5 rounded-lg text-sm font-bold ml-2">https://animesalt-api-lovat.vercel.app</code>
+            Base URL: <code className="text-[#FFBADE] bg-[#FFBADE]/10 px-3 py-1.5 rounded-lg text-sm font-bold ml-2">https://animesalt-api-main.vercel.app</code>
           </p>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
