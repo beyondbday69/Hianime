@@ -88,12 +88,9 @@ export function Dubbed() {
             </div>
           ) : data ? (
             <div className="space-y-4">
-              {renderSection("Fresh Drops", data.data.fresh_drops)}
-              {renderSection("On-Air Series", data.data["on-air_series_view_more"])}
-              {renderSection("New Anime Arrivals", data.data.new_anime_arrivals_view_more)}
-              {renderSection("Just In: Cartoons", data.data["just_in:_cartoon_series_view_more"])}
-              {renderSection("Fresh Cartoon Films", data.data.fresh_cartoon_films_view_more)}
-              {renderSection("Latest Anime Movies", data.data.latest_anime_movies_view_more)}
+              {Object.entries(data.data).map(([key, items]) => 
+                renderSection(key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), items)
+              )}
             </div>
           ) : null}
         </div>

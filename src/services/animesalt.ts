@@ -29,14 +29,7 @@ export interface AnimeSaltHomeItem {
 
 export interface AnimeSaltHomeResponse {
   success: boolean;
-  data: {
-    fresh_drops: AnimeSaltHomeItem[];
-    "on-air_series_view_more": AnimeSaltHomeItem[];
-    new_anime_arrivals_view_more: AnimeSaltHomeItem[];
-    "just_in:_cartoon_series_view_more": AnimeSaltHomeItem[];
-    latest_anime_movies_view_more?: AnimeSaltHomeItem[];
-    fresh_cartoon_films_view_more: AnimeSaltHomeItem[];
-  }
+  data: Record<string, AnimeSaltHomeItem[]>;
 }
 
 export async function fetchAnimeSaltHome(): Promise<AnimeSaltHomeResponse> {
