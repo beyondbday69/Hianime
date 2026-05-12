@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/animesalt/:path*",
-      "destination": "https://animesalt-api-lovat.vercel.app/:path*"
+      "destination": "https://animesalt-api-main.vercel.app/:path*"
     },
     {
       "source": "/(.*)",

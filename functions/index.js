@@ -15,7 +15,7 @@ exports.apiProxy = functions.https.onRequest(async (req, res) => {
 
   // Extract the path and query (e.g., /api/home)
   // req.url contains the path after the function trigger
-  const targetUrl = `https://animesalt-api-lovat.vercel.app${req.url}`;
+  const targetUrl = `https://animesalt-api-main.vercel.app${req.url}`;
 
   try {
     const response = await axios({
