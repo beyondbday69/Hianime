@@ -49,7 +49,14 @@ export function DubbedAnimeDetails() {
     episodes.forEach(ep => {
       if (ep.season) s.add(ep.season);
     });
-    return Array.from(s).sort((a, b) => parseInt(a) - parseInt(b));
+    return Array.from(s).sort((a, b) => {
+      const na = parseInt(a.replace(/\D/g, ''));
+      const nb = parseInt(b.replace(/\D/g, ''));
+      if (isNaN(na) && isNaN(nb)) return a.localeCompare(b);
+      if (isNaN(na)) return 1;
+      if (isNaN(nb)) return -1;
+      return na - nb;
+    });
   }, [episodes]);
 
   // Sync selected season when data loads

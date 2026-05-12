@@ -30,6 +30,7 @@ export function DubbedWatch() {
 
   const [autoNext, setAutoNext] = useState(true);
   const [alwaysOn, setAlwaysOn] = useState(true);
+  const [activeServerUrl, setActiveServerUrl] = useState<string | null>(null);
 
   // Parse episodes & seasons
   const allEpisodes = anime?.data?.episodes || [];
@@ -97,6 +98,12 @@ export function DubbedWatch() {
         }
 
         setEpisodeData(epInfo);
+        // Initialize active server
+        if (epInfo?.data?.servers && epInfo.data.servers.length > 0) {
+          setActiveServerUrl(epInfo.data.servers[0].url);
+        } else {
+          setActiveServerUrl(epInfo?.data?.video_player || null);
+        }
       } catch (err) {
         console.error(err);
         setError("Failed to load video player.");
@@ -156,9 +163,9 @@ export function DubbedWatch() {
               <div className="w-full aspect-video bg-black rounded-[16px] shadow-2xl relative overflow-hidden chrome-border">
                 {playerLoading ? (
                   <div className="w-full h-full shimmer" />
-                ) : episodeData?.data.video_player ? (
+                ) : activeServerUrl ? (
                   <iframe
-                    src={episodeData.data.video_player}
+                    src={activeServerUrl}
                     allowFullScreen
                     sandbox={alwaysOn ? "allow-scripts allow-same-origin allow-forms" : "allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox"}
                     className="w-full h-full border-0"
@@ -261,6 +268,30 @@ export function DubbedWatch() {
                   </div>
 
                 </div>
+
+                {/* Servers selection */}
+                {episodeData?.data.servers && episodeData.data.servers.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4 bg-[#121212]/30 p-4 rounded-[16px] border border-white/5">
+                     <div className="w-full mb-1 flex items-center justify-between">
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Available Servers</span>
+                        <span className="text-[10px] font-bold text-[var(--color-primary)]/50">{episodeData.data.servers.length} Links</span>
+                     </div>
+                     {episodeData.data.servers.map((server: any, idx: number) => (
+                       <button
+                         key={idx}
+                         onClick={() => setActiveServerUrl(server.url)}
+                         className={cn(
+                           "px-4 py-2 rounded-[10px] text-[12px] font-bold transition-all border",
+                           activeServerUrl === server.url 
+                            ? "bg-[var(--color-primary)] text-black border-[var(--color-primary)] shadow-[0_0_15px_rgba(255,186,222,0.2)]" 
+                            : "bg-white/5 text-white/60 border-white/5 hover:bg-white/10 hover:text-white"
+                         )}
+                       >
+                         {server.name || `Server ${idx + 1}`}
+                       </button>
+                     ))}
+                  </div>
+                )}
               </div>
             </div>
 
