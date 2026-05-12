@@ -11,7 +11,7 @@ async function startServer() {
   app.use(
     "/api/animesalt",
     createProxyMiddleware({
-      target: "https://animesalt-api-lovat.vercel.app",
+      target: "https://animesalt-api-main.vercel.app",
       changeOrigin: true,
       pathRewrite: {
         "^/api/animesalt": "",
